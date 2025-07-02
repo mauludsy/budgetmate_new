@@ -1,0 +1,23 @@
+name: budget_mate_app # Nama proyek Anda, sesuaikan jika berbeda
+description: A new Flutter project for budget management.
+publish_to: 'none' # Jangan publikasikan ke pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0' # Pastikan versi SDK Dart sesuai
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8 # Untuk ikon gaya iOS
+  intl: ^0.19.0 # Untuk format tanggal dan mata uang
+  fl_chart: ^0.68.0 # <--- Tambahkan dependensi ini untuk grafik
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true # Menggunakan Material Design
