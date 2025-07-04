@@ -1,9 +1,12 @@
+// lib/screens/dashboard_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:budget_mate_app/models/transaction.dart';
 import 'package:budget_mate_app/models/category.dart';
 import 'package:budget_mate_app/screens/transaction_input_screen.dart';
+import 'package:budget_mate_app/screens/split_bill_screen.dart'; // Import halaman Split Bill
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -236,23 +239,50 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           _buildTabContent(context, isExpenseTab: false, transactions: incomeTransactions, totalAmount: totalIncome),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const TransactionInputScreen()),
-          ).then((value) {
-            if (value != null && value is bool && value) {
-              setState(() {
-              });
-            }
-          });
-        },
-        backgroundColor: Theme.of(context).floatingActionButtonTheme.backgroundColor,
-        foregroundColor: Theme.of(context).floatingActionButtonTheme.foregroundColor,
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      bottomNavigationBar: BottomAppBar(
+        surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            // Tombol Tambah Transaksi (+) (sekarang yang pertama, jadi di kiri)
+            FloatingActionButton(
+              heroTag: 'addTransactionBtn', // Penting untuk membedakan FAB
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TransactionInputScreen()),
+                ).then((value) {
+                  if (value != null && value is bool && value) {
+                    setState(() {
+                      // Trigger rebuild untuk refresh data jika ada perubahan
+                    });
+                  }
+                });
+              },
+              backgroundColor: Theme.of(context).floatingActionButtonTheme.backgroundColor,
+              foregroundColor: Theme.of(context).floatingActionButtonTheme.foregroundColor,
+              child: const Icon(Icons.add),
+            ),
+            const SizedBox(width: 16), // Jarak antara tombol
+            // Tombol Split Bill (sekarang yang kedua, jadi di kanan)
+            FloatingActionButton(
+              heroTag: 'splitBillBtn', // Penting untuk membedakan FAB
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SplitBillScreen()),
+                );
+              },
+              backgroundColor: Theme.of(context).colorScheme.secondary, // Warna berbeda untuk Split Bill
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.people_alt_outlined), // Ikon untuk Split Bill
+            ),
+          ],
+        ),
+      ),
     );
   }
 
