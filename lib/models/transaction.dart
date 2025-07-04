@@ -1,15 +1,13 @@
-// lib/models/transaction.dart
-
-import 'package:flutter/material.dart'; // Untuk IconData
-import 'package:budget_mate_app/models/category.dart'; // Import model Category
+import 'package:flutter/material.dart';
+import './category.dart';
 
 class Transaction {
-  final String id; // ID unik
-  final String title; // Judul transaksi
-  final double amount; // Jumlah uang
-  final DateTime date; // Tanggal transaksi
-  final bool isExpense; // true jika pengeluaran, false jika pemasukan
-  final Category category; // Kategori transaksi
+  final String id;
+  final String title;
+  final double amount;
+  final DateTime date;
+  final bool isExpense;
+  final Category category;
 
   Transaction({
     required this.id,

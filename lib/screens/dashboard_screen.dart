@@ -1,11 +1,9 @@
-// lib/screens/dashboard_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:fl_chart/fl_chart.dart'; // Import fl_chart
+import 'package:fl_chart/fl_chart.dart';
 import 'package:budget_mate_app/models/transaction.dart';
 import 'package:budget_mate_app/models/category.dart';
-import 'package:budget_mate_app/screens/transaction_input_screen.dart'; // Import layar input transaksi
+import 'package:budget_mate_app/screens/transaction_input_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -16,45 +14,45 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  int _selectedMonthIndex = 5; // Juni (indeks 5)
+  int _selectedMonthIndex = 5;
   final List<String> _months = [
     'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
     'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
   ];
 
-  // Data dummy transaksi yang lebih detail
   final List<Transaction> _allTransactions = [
-    // Juni
-    Transaction(id: 'j1', title: 'Gaji Bulanan', amount: 8000000, date: DateTime(2025, 6, 1), isExpense: false, category: dummyCategories.firstWhere((cat) => cat.name == 'Gaji')),
-    Transaction(id: 'j2', title: 'Makan Siang', amount: 35000, date: DateTime(2025, 6, 2), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Makan')),
-    Transaction(id: 'j3', title: 'Bayar Listrik', amount: 250000, date: DateTime(2025, 6, 3), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Lain-lain')),
-    Transaction(id: 'j4', title: 'Bonus Proyek', amount: 1500000, date: DateTime(2025, 6, 4), isExpense: false, category: dummyCategories.firstWhere((cat) => cat.name == 'Bonus')),
-    Transaction(id: 'j5', title: 'Belanja Bulanan', amount: 800000, date: DateTime(2025, 6, 5), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Belanja')),
-    Transaction(id: 'j6', title: 'Transportasi', amount: 50000, date: DateTime(2025, 6, 6), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Lain-lain')),
-    Transaction(id: 'j7', title: 'Penjualan Barang Bekas', amount: 120000, date: DateTime(2025, 6, 7), isExpense: false, category: dummyCategories.firstWhere((cat) => cat.name == 'Lain-lain')),
-    Transaction(id: 'j8', title: 'Hiburan', amount: 150000, date: DateTime(2025, 6, 8), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Hiburan')),
-    Transaction(id: 'j9', title: 'Telepon', amount: 80000, date: DateTime(2025, 6, 9), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Telepon')),
-    Transaction(id: 'j10', title: 'Camilan', amount: 50000, date: DateTime(2025, 6, 10), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Camilan')),
-    Transaction(id: 'j11', title: 'Sehari-hari', amount: 30000, date: DateTime(2025, 6, 11), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Sehari-hari')),
-    Transaction(id: 'j12', title: 'Makan Malam', amount: 45000, date: DateTime(2025, 6, 12), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Makan')),
-    Transaction(id: 'j13', title: 'Minum Kopi', amount: 25000, date: DateTime(2025, 6, 13), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Minum')),
-    Transaction(id: 'j14', title: 'Beli Buah', amount: 20000, date: DateTime(2025, 6, 14), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Buah')),
-    Transaction(id: 'j15', title: 'Beli Sayur', amount: 15000, date: DateTime(2025, 6, 15), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Sayur')),
-    Transaction(id: 'j16', title: 'Hiburan', amount: 70000, date: DateTime(2025, 6, 16), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Hiburan')),
-    Transaction(id: 'j17', title: 'Pulsa', amount: 50000, date: DateTime(2025, 6, 17), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Telepon')),
-    Transaction(id: 'j18', title: 'Makan Siang', amount: 30000, date: DateTime(2025, 6, 18), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Makan')),
-    Transaction(id: 'j19', title: 'Camilan', amount: 20000, date: DateTime(2025, 6, 19), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Camilan')),
-    Transaction(id: 'j20', title: 'Transportasi', amount: 40000, date: DateTime(2025, 6, 20), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Lain-lain')),
-    Transaction(id: 'j21', title: 'Hiburan', amount: 60000, date: DateTime(2025, 6, 21), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Hiburan')),
-    Transaction(id: 'j22', title: 'Makan Malam', amount: 50000, date: DateTime(2025, 6, 22), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Makan')),
-    Transaction(id: 'j23', title: 'Minum', amount: 15000, date: DateTime(2025, 6, 23), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Minum')),
-    Transaction(id: 'j24', title: 'Belanja', amount: 100000, date: DateTime(2025, 6, 24), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Belanja')),
-    Transaction(id: 'j25', title: 'Sehari-hari', amount: 25000, date: DateTime(2025, 6, 25), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Sehari-hari')),
-    Transaction(id: 'j26', title: 'Makan Siang', amount: 38000, date: DateTime(2025, 6, 26), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Makan')),
-    Transaction(id: 'j27', title: 'Hiburan', amount: 90000, date: DateTime(2025, 6, 27), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Hiburan')),
-    Transaction(id: 'j28', title: 'Telepon', amount: 40000, date: DateTime(2025, 6, 28), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Telepon')),
-    Transaction(id: 'j29', title: 'Camilan', amount: 18000, date: DateTime(2025, 6, 29), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Camilan')),
-    Transaction(id: 'j30', title: 'Lain-lain', amount: 75000, date: DateTime(2025, 6, 30), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.name == 'Lain-lain')),
+    Transaction(id: 'j1', title: 'Gaji Bulanan', amount: 8000000, date: DateTime(2025, 6, 1), isExpense: false, category: dummyCategories.firstWhere((cat) => cat.id == 'c5')),
+    Transaction(id: 'j2', title: 'Makan Siang', amount: 35000, date: DateTime(2025, 6, 2), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c1')),
+    Transaction(id: 'j3', title: 'Bayar Listrik', amount: 250000, date: DateTime(2025, 6, 3), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c13')),
+    Transaction(id: 'j4', title: 'Bonus Proyek', amount: 1500000, date: DateTime(2025, 6, 4), isExpense: false, category: dummyCategories.firstWhere((cat) => cat.id == 'c15')),
+    Transaction(id: 'j5', title: 'Belanja Bulanan', amount: 800000, date: DateTime(2025, 6, 5), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c7')),
+    Transaction(id: 'j6', title: 'Transportasi', amount: 50000, date: DateTime(2025, 6, 6), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c13')),
+    Transaction(id: 'j7', title: 'Penjualan Barang Bekas', amount: 120000, date: DateTime(2025, 6, 7), isExpense: false, category: dummyCategories.firstWhere((cat) => cat.id == 'c13')),
+    Transaction(id: 'j8', title: 'Hiburan', amount: 150000, date: DateTime(2025, 6, 8), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c4')),
+    Transaction(id: 'j9', title: 'Telepon', amount: 80000, date: DateTime(2025, 6, 9), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c3')),
+    Transaction(id: 'j10', title: 'Camilan', amount: 50000, date: DateTime(2025, 6, 10), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c12')),
+    Transaction(id: 'j11', title: 'Sehari-hari', amount: 30000, date: DateTime(2025, 6, 11), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c11')),
+    Transaction(id: 'j12', title: 'Makan Malam', amount: 45000, date: DateTime(2025, 6, 12), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c1')),
+    Transaction(id: 'j13', title: 'Minum Kopi', amount: 25000, date: DateTime(2025, 6, 13), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c2')),
+    Transaction(id: 'j14', title: 'Beli Buah', amount: 20000, date: DateTime(2025, 6, 14), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c8')),
+    Transaction(id: 'j15', title: 'Beli Sayur', amount: 15000, date: DateTime(2025, 6, 15), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c9')),
+    Transaction(id: 'j16', title: 'Hiburan', amount: 70000, date: DateTime(2025, 6, 16), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c4')),
+    Transaction(id: 'j17', title: 'Pulsa', amount: 50000, date: DateTime(2025, 6, 17), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c3')),
+    Transaction(id: 'j18', title: 'Makan Siang', amount: 30000, date: DateTime(2025, 6, 18), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c1')),
+    Transaction(id: 'j19', title: 'Camilan', amount: 20000, date: DateTime(2025, 6, 19), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c12')),
+    Transaction(id: 'j20', title: 'Transportasi', amount: 40000, date: DateTime(2025, 6, 20), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c13')),
+    Transaction(id: 'j21', title: 'Hiburan', amount: 60000, date: DateTime(2025, 6, 21), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c4')),
+    Transaction(id: 'j22', title: 'Makan Malam', amount: 50000, date: DateTime(2025, 6, 22), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c1')),
+    Transaction(id: 'j23', title: 'Minum', amount: 15000, date: DateTime(2025, 6, 23), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c2')),
+    Transaction(id: 'j24', title: 'Belanja', amount: 100000, date: DateTime(2025, 6, 24), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c7')),
+    Transaction(id: 'j25', title: 'Sehari-hari', amount: 25000, date: DateTime(2025, 6, 25), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c11')),
+    Transaction(id: 'j26', title: 'Makan Siang', amount: 38000, date: DateTime(2025, 6, 26), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c1')),
+    Transaction(id: 'j27', title: 'Hiburan', amount: 90000, date: DateTime(2025, 6, 27), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c4')),
+    Transaction(id: 'j28', title: 'Telepon', amount: 40000, date: DateTime(2025, 6, 28), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c3')),
+    Transaction(id: 'j29', title: 'Camilan', amount: 18000, date: DateTime(2025, 6, 29), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c12')),
+    Transaction(id: 'j30', title: 'Lain-lain', amount: 75000, date: DateTime(2025, 6, 30), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c13')),
+    Transaction(id: 'a1', title: 'Gaji Mei', amount: 7500000, date: DateTime(2025, 5, 1), isExpense: false, category: dummyCategories.firstWhere((cat) => cat.id == 'c5')),
+    Transaction(id: 'a2', title: 'Belanja Mei', amount: 500000, date: DateTime(2025, 5, 10), isExpense: true, category: dummyCategories.firstWhere((cat) => cat.id == 'c7')),
   ];
 
   List<Transaction> get _currentMonthTransactions {
@@ -63,7 +61,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     }).toList();
   }
 
-  // GlobalKey untuk mengakses ScaffoldState dan membuka Drawer
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -87,12 +84,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     double totalIncome = incomeTransactions.fold(0.0, (sum, tx) => sum + tx.amount);
 
     return Scaffold(
-      key: _scaffoldKey, // Tetapkan GlobalKey ke Scaffold
+      key: _scaffoldKey,
       appBar: AppBar(
-        leading: IconButton( // Tombol untuk membuka Drawer
+        leading: IconButton(
           icon: const Icon(Icons.menu, color: Colors.white),
           onPressed: () {
-            _scaffoldKey.currentState?.openDrawer(); // Buka Drawer
+            _scaffoldKey.currentState?.openDrawer();
           },
         ),
         title: Row(
@@ -134,10 +131,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         backgroundColor: Theme.of(context).primaryColor,
         elevation: 0,
         actions: const [
-          SizedBox(width: 48), // Spacer untuk menyeimbangkan leading icon
+          SizedBox(width: 48),
         ],
       ),
-      drawer: Drawer( // Widget Drawer untuk menu samping
+      drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -152,7 +149,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     radius: 30,
                     backgroundColor: Colors.white,
                     child: Text(
-                      'A', // Inisial pengguna
+                      'A',
                       style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
@@ -162,7 +159,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Alifa xxxxx', // Nama pengguna
+                    'Alifa xxxxx',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -170,7 +167,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     ),
                   ),
                   const Text(
-                    'ID : 1717224', // ID pengguna
+                    'ID : 1717224',
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
@@ -183,7 +180,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               leading: const Icon(Icons.person_add_alt_1),
               title: const Text('Rekomendasi ke teman'),
               onTap: () {
-                Navigator.pop(context); // Tutup drawer
+                Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Rekomendasi ke teman ditekan!')),
                 );
@@ -229,7 +226,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 );
               },
             ),
-            // Anda bisa menambahkan Divider atau item lain di sini
           ],
         ),
       ),
@@ -245,7 +241,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const TransactionInputScreen()),
-          );
+          ).then((value) {
+            if (value != null && value is bool && value) {
+              setState(() {
+              });
+            }
+          });
         },
         backgroundColor: Theme.of(context).floatingActionButtonTheme.backgroundColor,
         foregroundColor: Theme.of(context).floatingActionButtonTheme.foregroundColor,
@@ -258,29 +259,25 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   Widget _buildTabContent(BuildContext context, {required bool isExpenseTab, required List<Transaction> transactions, required double totalAmount}) {
     final averageAmount = transactions.isEmpty ? 0.0 : totalAmount / transactions.length;
 
-    // Hitung total pengeluaran/pemasukan per kategori
     Map<Category, double> categoryTotals = {};
     for (var tx in transactions) {
       categoryTotals.update(tx.category, (value) => value + tx.amount, ifAbsent: () => tx.amount);
     }
 
-    // Urutkan kategori berdasarkan jumlah (terbesar ke terkecil)
     final sortedCategories = categoryTotals.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
-    // Ambil 4 kategori teratas untuk peringkat
     final topCategories = sortedCategories.take(4).toList();
 
-    // Data untuk Pie Chart
     List<PieChartSectionData> pieChartSections = [];
     if (totalAmount > 0) {
       for (var entry in sortedCategories) {
         final percentage = (entry.value / totalAmount) * 100;
         pieChartSections.add(
           PieChartSectionData(
-            color: entry.key.color.shade300, // Menggunakan shade300 untuk warna di pie chart
+            color: entry.key.color.shade300,
             value: entry.value,
-            title: '${percentage.toStringAsFixed(1)}%',
+            title: percentage < 5 ? '' : '${percentage.toStringAsFixed(1)}%',
             radius: 50,
             titleStyle: const TextStyle(
               fontSize: 12,
@@ -291,7 +288,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         );
       }
     } else {
-      // Tampilkan bagian kosong jika tidak ada data
       pieChartSections.add(
         PieChartSectionData(
           color: Colors.grey.shade300,
@@ -307,12 +303,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       );
     }
 
-
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Ringkasan Pengeluaran/Pemasukan dan Rata-rata
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
@@ -334,7 +328,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               ],
             ),
           ),
-          // Line Chart
           AspectRatio(
             aspectRatio: 1.70,
             child: Padding(
@@ -348,7 +341,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         showTitles: true,
                         reservedSize: 30,
                         getTitlesWidget: (value, meta) {
-                          // Tampilkan label tanggal setiap 7 hari atau sesuai kebutuhan
+                          final daysInMonth = DateTime(2025, _selectedMonthIndex + 2, 0).day;
+                          if (value.toInt() < 1 || value.toInt() > daysInMonth) {
+                            return const SizedBox.shrink();
+                          }
                           final date = DateTime(2025, _selectedMonthIndex + 1, value.toInt());
                           return SideTitleWidget(
                             axisSide: meta.axisSide,
@@ -356,7 +352,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             child: Text(DateFormat('dd').format(date), style: const TextStyle(fontSize: 10)),
                           );
                         },
-                        interval: 7, // Tampilkan label setiap 7 hari
+                        interval: 7,
                       ),
                     ),
                     leftTitles: AxisTitles(
@@ -366,7 +362,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         getTitlesWidget: (value, meta) {
                           return Text(NumberFormat.compact().format(value), style: const TextStyle(fontSize: 10));
                         },
-                        interval: (totalAmount / 3).clamp(10000, 1000000).toDouble(), // Sesuaikan interval
+                        interval: (totalAmount / 3).clamp(10000.0, 10000000.0),
                       ),
                     ),
                     topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -391,15 +387,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     ),
                   ],
                   minX: 1,
-                  maxX: DateTime(2025, _selectedMonthIndex + 2, 0).day.toDouble(), // Jumlah hari dalam bulan
+                  maxX: DateTime(2025, _selectedMonthIndex + 2, 0).day.toDouble(),
                   minY: 0,
-                  maxY: (totalAmount * 1.2).clamp(100000, 10000000).toDouble(), // Sesuaikan Y max
+                  maxY: (totalAmount * 1.2).clamp(100000.0, 100000000.0),
                 ),
               ),
             ),
           ),
           const SizedBox(height: 20),
-          // Peringkat Kategori
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
@@ -411,7 +406,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Pie Chart
               Expanded(
                 flex: 2,
                 child: AspectRatio(
@@ -426,17 +420,16 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   ),
                 ),
               ),
-              // Daftar Peringkat Kategori
               Expanded(
                 flex: 3,
                 child: Column(
                   children: topCategories.map((entry) {
-                    final percentage = (entry.value / totalAmount) * 100;
+                    final percentage = totalAmount > 0 ? (entry.value / totalAmount) * 100 : 0.0;
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                       child: Row(
                         children: [
-                          Icon(entry.key.icon, color: entry.key.color.shade800, size: 20), // Menggunakan shade800
+                          Icon(entry.key.icon, color: entry.key.color.shade800, size: 20),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -462,7 +455,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
-  // Helper untuk mendapatkan data spot Line Chart
   List<FlSpot> _getLineChartSpots(List<Transaction> transactions, bool isExpense) {
     Map<int, double> dailyTotals = {};
     for (var tx in transactions) {
@@ -471,7 +463,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     }
 
     List<FlSpot> spots = [];
-    final daysInMonth = DateTime(2025, _selectedMonthIndex + 2, 0).day; // Jumlah hari dalam bulan
+    final daysInMonth = DateTime(2025, _selectedMonthIndex + 2, 0).day;
     for (int i = 1; i <= daysInMonth; i++) {
       spots.add(FlSpot(i.toDouble(), dailyTotals[i] ?? 0.0));
     }
