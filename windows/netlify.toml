@@ -1,0 +1,14 @@
+[build]
+  publish = "build/web" # Direktori output setelah build Flutter
+  command = "flutter build web" # Perintah build Flutter
+
+# Instalasi Flutter SDK di lingkungan Netlify
+[build.environment]
+  # Mengatur lokasi Flutter
+  FLUTTER_STORAGE_BASE_URL = "https://storage.googleapis.com"
+  PUB_HOSTED_URL = "https://pub.dev"
+
+[[plugins]]
+package = "@netlify/plugin-build"
+[plugins.inputs.build.commands]
+  "install-flutter" = "git clone https://github.com/flutter/flutter.git --depth 1 -b stable .flutter && .flutter/bin/flutter precache"
