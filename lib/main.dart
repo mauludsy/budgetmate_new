@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:budget_mate_app/screens/auth_screen.dart';
+import 'package:budget_mate_app/screens/dashboard_screen.dart'; // pastikan file ini ada
 
 void main() {
   runApp(const MyApp());
@@ -32,18 +33,13 @@ class MyApp extends StatelessWidget {
           backgroundColor: Color(0xFF8BC34A),
           foregroundColor: Colors.white,
         ),
-        // ========================================================
-        // Baris-baris ini dinonaktifkan sementara untuk mengatasi error CardTheme
-        // cardTheme: const CardTheme(
-        //   elevation: 4,
-        //   shape: RoundedRectangleBorder(
-        //     borderRadius: BorderRadius.all(Radius.circular(12.0)),
-        //   ),
-        // ),
-        // ========================================================
         useMaterial3: true,
       ),
-      home: const AuthScreen(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const AuthScreen(),
+        '/dashboard': (context) => const DashboardScreen(),
+      },
       debugShowCheckedModeBanner: false,
     );
   }
