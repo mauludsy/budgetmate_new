@@ -1,85 +1,50 @@
+// lib/screens/auth_screen.dart
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:budget_mate_app/main.dart'; // Import MainScreen dari main.dart
 
 class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key});
+  final VoidCallback? onLoginSuccess; // Ubah menjadi nullable dengan '?'
+
+  const AuthScreen({super.key, this.onLoginSuccess}); // Hapus 'required'
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _AuthScreenState extends State<AuthScreen> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLogin = true; // true for login, false for register
 
-  final TextEditingController _loginEmailController = TextEditingController();
-  final TextEditingController _loginPasswordController = TextEditingController();
-  final TextEditingController _signupNameController = TextEditingController();
-  final TextEditingController _signupEmailController = TextEditingController();
-  final TextEditingController _signupPasswordController = TextEditingController();
-  final TextEditingController _signupConfirmPasswordController = TextEditingController();
+  Future<void> _authenticate() async {
+    final String username = _usernameController.text;
+    final String password = _passwordController.text;
 
-  final _formKeyLogin = GlobalKey<FormState>();
-  final _formKeySignup = GlobalKey<FormState>();
+    print('Mencoba login dengan Username: $username, Password: $password'); // Debugging
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
+    // Simulasi autentikasi: username 'user', password 'pass'
+    if (username == 'user' && password == 'pass') {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true); // Set status login true
+      print('Login berhasil! isLoggedIn di SharedPreferences: true'); // Debugging
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _loginEmailController.dispose();
-    _loginPasswordController.dispose();
-    _signupNameController.dispose();
-    _signupEmailController.dispose();
-    _signupPasswordController.dispose();
-    _signupConfirmPasswordController.dispose();
-    super.dispose();
-  }
-
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
-  void _login() {
-    if (_formKeyLogin.currentState?.validate() ?? false) {
-      final email = _loginEmailController.text;
-      final password = _loginPasswordController.text;
-
-      if (email == 'user@example.com' && password == 'password123') {
-        _showSnackBar('Login Berhasil!');
-        // ⬇ Navigasi menggunakan named route untuk mendukung URL seperti /dashboard
-        Navigator.pushReplacementNamed(context, '/dashboard');
-      } else {
-        _showSnackBar('Email atau password salah.');
-      }
-    }
-  }
-
-  void _signup() {
-    if (_formKeySignup.currentState?.validate() ?? false) {
-      final name = _signupNameController.text;
-      final email = _signupEmailController.text;
-      final password = _signupPasswordController.text;
-      final confirmPassword = _signupConfirmPasswordController.text;
-
-      if (password != confirmPassword) {
-        _showSnackBar('Konfirmasi password tidak cocok.');
-        return;
+      // Panggil onLoginSuccess hanya jika tidak null
+      if (widget.onLoginSuccess != null) {
+        widget.onLoginSuccess!(); // Gunakan '!' karena kita sudah cek tidak null
+        print('Callback onLoginSuccess dipanggil.'); // Debugging
       }
 
-      _showSnackBar('Registrasi Berhasil! Silakan Login.');
-      _tabController.animateTo(0);
-      _loginEmailController.text = email;
-
-      _signupNameController.clear();
-      _signupEmailController.clear();
-      _signupPasswordController.clear();
-      _signupConfirmPasswordController.clear();
+      // Navigasi ke MainScreen dan hapus semua rute sebelumnya
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => MainScreen()), // Hapus 'const' di sini
+        (Route<dynamic> route) => false,
+      );
+    } else {
+      print('Login gagal: Username atau Password salah.'); // Debugging
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Username atau Password salah!')),
+      );
     }
   }
 
@@ -87,182 +52,51 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Selamat Datang di Budget Mate'),
-        backgroundColor: Theme.of(context).primaryColor,
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          tabs: const [
-            Tab(text: 'Login'),
-            Tab(text: 'Daftar'),
-          ],
-        ),
+        title: Text(_isLogin ? 'Login' : 'Daftar'),
+        backgroundColor: Colors.green[700],
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildLoginForm(),
-          _buildSignupForm(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLoginForm() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
-      child: Form(
-        key: _formKeyLogin,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 40),
-            Text(
-              'Masuk ke Akun Anda',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 30),
-            TextFormField(
-              controller: _loginEmailController,
+            TextField(
+              controller: _usernameController,
               decoration: const InputDecoration(
-                labelText: 'Email',
-                prefixIcon: Icon(Icons.email),
+                labelText: 'Username',
                 border: OutlineInputBorder(),
               ),
-              keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                if (value == null || value.isEmpty) return 'Email tidak boleh kosong';
-                if (!value.contains('@')) return 'Masukkan email yang valid';
-                return null;
-              },
             ),
-            const SizedBox(height: 20),
-            TextFormField(
-              controller: _loginPasswordController,
+            const SizedBox(height: 16),
+            TextField(
+              controller: _passwordController,
+              obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'Password',
-                prefixIcon: Icon(Icons.lock),
                 border: OutlineInputBorder(),
               ),
-              obscureText: true,
-              validator: (value) {
-                if (value == null || value.isEmpty) return 'Password tidak boleh kosong';
-                return null;
-              },
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _login,
+              onPressed: _authenticate,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                backgroundColor: Colors.green[600],
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
-              child: const Text('Login', style: TextStyle(fontSize: 18)),
+              child: Text(_isLogin ? 'Login' : 'Daftar'),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             TextButton(
               onPressed: () {
-                _showSnackBar('Fitur lupa password belum tersedia.');
+                setState(() {
+                  _isLogin = !_isLogin;
+                  // Kosongkan field saat beralih mode
+                  _usernameController.clear();
+                  _passwordController.clear();
+                });
               },
-              child: Text(
-                'Lupa Password?',
-                style: TextStyle(color: Theme.of(context).primaryColor),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSignupForm() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
-      child: Form(
-        key: _formKeySignup,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 40),
-            Text(
-              'Buat Akun Baru',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 30),
-            TextFormField(
-              controller: _signupNameController,
-              decoration: const InputDecoration(
-                labelText: 'Nama Lengkap',
-                prefixIcon: Icon(Icons.person),
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) return 'Nama tidak boleh kosong';
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              controller: _signupEmailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                prefixIcon: Icon(Icons.email),
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                if (value == null || value.isEmpty) return 'Email tidak boleh kosong';
-                if (!value.contains('@')) return 'Masukkan email yang valid';
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              controller: _signupPasswordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                prefixIcon: Icon(Icons.lock),
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
-              validator: (value) {
-                if (value == null || value.isEmpty) return 'Password tidak boleh kosong';
-                if (value.length < 6) return 'Password minimal 6 karakter';
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              controller: _signupConfirmPasswordController,
-              decoration: const InputDecoration(
-                labelText: 'Konfirmasi Password',
-                prefixIcon: Icon(Icons.lock_reset),
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
-              validator: (value) {
-                if (value == null || value.isEmpty) return 'Konfirmasi password tidak boleh kosong';
-                if (value != _signupPasswordController.text) return 'Password tidak cocok';
-                return null;
-              },
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: _signup,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              child: const Text('Daftar', style: TextStyle(fontSize: 18)),
+              child: Text(_isLogin ? 'Belum punya akun? Daftar' : 'Sudah punya akun? Login'),
             ),
           ],
         ),
