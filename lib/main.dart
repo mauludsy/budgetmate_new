@@ -1,6 +1,7 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:budget_mate_app/screens/dashboard_screen.dart';
 import 'package:budget_mate_app/screens/graph_screen.dart';
 import 'package:budget_mate_app/screens/transaction_in_out_screen.dart';
@@ -8,9 +9,15 @@ import 'package:budget_mate_app/screens/split_bill_screen.dart';
 import 'package:budget_mate_app/screens/account_screen.dart';
 import 'package:budget_mate_app/screens/auth_screen.dart'; // Import AuthScreen Anda
 
-void main() {
+// void main() {
+//   runApp(const MyApp());
+// }
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // WAJIB sebelum async operation
+  await initializeDateFormatting('id', null); // Inisialisasi format lokal Indonesia
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
