@@ -3,36 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 
-class GraphScreen extends StatefulWidget { // UBAH MENJADI StatefulWidget
+class GraphScreen extends StatefulWidget {
   const GraphScreen({super.key});
 
   @override
   State<GraphScreen> createState() => _GraphScreenState();
 }
 
-class _GraphScreenState extends State<GraphScreen> { // Buat kelas State
-  // Variabel untuk menyimpan bulan dan tahun yang sedang ditampilkan
-  late DateTime _selectedMonth;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedMonth = DateTime.now(); // Inisialisasi dengan bulan/tahun saat ini
-  }
-
-  // Fungsi untuk berpindah bulan (akan digunakan jika ingin ada tombol di GraphScreen)
-  void _changeMonth(int monthsToAdd) {
-    setState(() {
-      _selectedMonth = DateTime(
-        _selectedMonth.year,
-        _selectedMonth.month + monthsToAdd,
-        _selectedMonth.day,
-      );
-      // Di sini Anda juga akan memuat ulang data grafik dan kategori berdasarkan _selectedMonth
-      // Untuk saat ini, data akan tetap dummy, hanya label bulan yang berubah.
-    });
-  }
-
+class _GraphScreenState extends State<GraphScreen> {
   // Data dummy pengeluaran harian untuk satu bulan (misal Juni)
   final List<double> _pengeluaranHarian = const [
     50000, 20000, 0, 0, 15000, 0, 70000, // Hari 1-7
@@ -42,6 +20,7 @@ class _GraphScreenState extends State<GraphScreen> { // Buat kelas State
   ];
 
   // Data dummy untuk Peringkat Kategori
+  // 'Lain-lain' dipindahkan ke posisi paling bawah
   final List<Map<String, dynamic>> _categoryData = [
     {'name': 'Belanja', 'percentage': 39.6, 'color': Colors.pink, 'icon': Icons.shopping_bag},
     {'name': 'Hiburan', 'percentage': 16.3, 'color': Colors.red, 'icon': Icons.movie},
@@ -59,14 +38,12 @@ class _GraphScreenState extends State<GraphScreen> { // Buat kelas State
   Widget build(BuildContext context) {
     // Hitung total pengeluaran bulan ini dari data harian
     final double totalPengeluaranBulanIni = _pengeluaranHarian.reduce((a, b) => a + b);
+    // Asumsi pemasukan bulan ini tetap dummy, karena grafik ini fokus pengeluaran harian
     final double totalPemasukanBulanIniDummy = 7200000.0;
     final double saldoBersihDummy = totalPemasukanBulanIniDummy - totalPengeluaranBulanIni;
 
     // Nilai Y maksimum untuk grafik harian, diatur ke 3 juta
-    const double fixedMaxY = 3000000.0;
-
-    // Format bulan dan tahun yang dipilih untuk judul grafik
-    final String displayMonthName = DateFormat('MMMM', 'id').format(_selectedMonth);
+    const double fixedMaxY = 3000000.0; // <<< DIATUR KE 3 JUTA
 
 
     return SingleChildScrollView(
@@ -75,9 +52,9 @@ class _GraphScreenState extends State<GraphScreen> { // Buat kelas State
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Grafik Pengeluaran Bulanan (${displayMonthName})', // Judul dengan nama bulan yang dipilih
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            const Text(
+              'Grafik Pengeluaran Bulanan (Juni)',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),
@@ -121,20 +98,21 @@ class _GraphScreenState extends State<GraphScreen> { // Buat kelas State
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 40,
+                        // Interval disesuaikan untuk rentang 0-3jt
                         interval: 1000000, // Interval 1 juta
                         getTitlesWidget: (value, meta) {
                           const style = TextStyle(fontWeight: FontWeight.bold, fontSize: 12);
                           String text;
                           if (value == 0) {
                             text = '0';
-                          } else if (value == 1000000) {
+                          } else if (value == 1000000) { // 1 juta
                             text = '1jt';
-                          } else if (value == 2000000) {
+                          } else if (value == 2000000) { // 2 juta
                             text = '2jt';
-                          } else if (value == 3000000) {
+                          } else if (value == 3000000) { // 3 juta
                             text = '3jt';
                           } else {
-                            return const SizedBox.shrink();
+                            return const SizedBox.shrink(); // Sembunyikan label lain
                           }
                           return SideTitleWidget(axisSide: meta.axisSide, child: Text(text, style: style));
                         },
@@ -146,17 +124,17 @@ class _GraphScreenState extends State<GraphScreen> { // Buat kelas State
                     border: Border.all(color: const Color(0xff37434d)),
                   ),
                   minX: 1, // Mulai dari hari ke-1
-                  maxX: _pengeluaranHarian.length.toDouble(), // Sampai hari terakhir (sesuai dummy 30 hari)
+                  maxX: _pengeluaranHarian.length.toDouble(), // Sampai hari terakhir
                   minY: 0,
-                  maxY: fixedMaxY,
+                  maxY: fixedMaxY, // <<< MENGGUNAKAN NILAI Y MAKSIMUM TETAP 3 JUTA
                   lineBarsData: [
                     // Data Pengeluaran Harian
                     LineChartBarData(
                       spots: List.generate(_pengeluaranHarian.length, (index) {
-                        return FlSpot(index + 1.0, _pengeluaranHarian[index]);
+                        return FlSpot(index + 1.0, _pengeluaranHarian[index]); // X = hari, Y = nominal
                       }),
                       isCurved: true,
-                      color: Colors.deepPurple,
+                      color: Colors.deepPurple, // Warna garis
                       barWidth: 2,
                       isStrokeCapRound: true,
                       dotData: const FlDotData(show: false),
@@ -267,7 +245,7 @@ class _GraphScreenState extends State<GraphScreen> { // Buat kelas State
                 ),
               ],
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 30), // Padding di bagian bawah
           ],
         ),
       ),

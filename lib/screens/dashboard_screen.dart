@@ -2,15 +2,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class DashboardScreen extends StatefulWidget { // UBAH MENJADI StatefulWidget
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> { // Buat kelas State
-  // Variabel untuk menyimpan bulan dan tahun yang sedang ditampilkan
+class _DashboardScreenState extends State<DashboardScreen> {
+  static const Color _customAppGreenColor = Color(0xFFC4E860);
+
   late DateTime _selectedMonth;
 
   @override
@@ -25,7 +26,7 @@ class _DashboardScreenState extends State<DashboardScreen> { // Buat kelas State
       _selectedMonth = DateTime(
         _selectedMonth.year,
         _selectedMonth.month + monthsToAdd,
-        _selectedMonth.day, // Biarkan hari tetap sama, Flutter akan menyesuaikan jika tidak valid
+        _selectedMonth.day,
       );
     });
   }
@@ -38,8 +39,9 @@ class _DashboardScreenState extends State<DashboardScreen> { // Buat kelas State
     final double pengeluaranHariIni = 150000.0; // Dummy data
     final double saldoSaatIni = 5500000.0; // Dummy data
 
-    // Format bulan dan tahun yang dipilih
-    final String displayMonthYear = DateFormat('MMM yyyy', 'id').format(_selectedMonth);
+    // Format bulan (disingkat) dan tahun (angka biasa)
+    // Contoh: "Jul 2025" atau "Jun 2024"
+    final String displayMonthYear = DateFormat('MMM yyyy', 'id').format(_selectedMonth); // <<< PERBAIKAN DI SINI
 
     final oCcy = NumberFormat.currency(locale: 'id', symbol: 'Rp', decimalDigits: 0);
 
@@ -63,7 +65,7 @@ class _DashboardScreenState extends State<DashboardScreen> { // Buat kelas State
             children: [
               // Header Bulan dan Tahun
               Container(
-                color: Colors.deepPurple[400],
+                color: _customAppGreenColor,
                 padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -72,26 +74,26 @@ class _DashboardScreenState extends State<DashboardScreen> { // Buat kelas State
                       children: [
                         IconButton(
                           icon: const Icon(Icons.chevron_left, color: Colors.white),
-                          onPressed: () => _changeMonth(-1), // Pindah ke bulan sebelumnya
+                          onPressed: () => _changeMonth(-1),
                         ),
                         Text(
-                          displayMonthYear, // Menampilkan bulan dan tahun yang dipilih
+                          displayMonthYear, // MENGGUNAKAN FORMAT BULAN DAN TAHUN STANDAR
                           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                         IconButton(
                           icon: const Icon(Icons.chevron_right, color: Colors.white),
-                          onPressed: () => _changeMonth(1), // Pindah ke bulan selanjutnya
+                          onPressed: () => _changeMonth(1),
                         ),
                       ],
                     ),
-                    const SizedBox(width: 48), // Spacer
+                    const SizedBox(width: 48),
                   ],
                 ),
               ),
 
               // Tab Pengeluaran / Pemasukan
               Container(
-                color: Colors.deepPurple[400],
+                color: _customAppGreenColor,
                 child: Row(
                   children: [
                     Expanded(
@@ -125,18 +127,6 @@ class _DashboardScreenState extends State<DashboardScreen> { // Buat kelas State
 
               const SizedBox(height: 20),
 
-              // Detail Pengeluaran Bulan Ini dan Rata-rata
-              Text(
-                'Pengeluaran Bulan Ini: ${oCcy.format(totalPengeluaranBulanIni)}',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'Rata-rata Harian: ${oCcy.format(rataRataHarian)}',
-                style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-              ),
-
-              const SizedBox(height: 20),
-
               // Area Saldo, Pengeluaran Hari Ini, Bulan Ini
               _buildSummaryCard(
                 context,
@@ -148,7 +138,7 @@ class _DashboardScreenState extends State<DashboardScreen> { // Buat kelas State
 
               const SizedBox(height: 20),
 
-              // Area Grafik Utama (placeholder atau grafik FlChart di sini)
+              // Area Grafik Utama (placeholder)
               Container(
                 height: 200,
                 decoration: BoxDecoration(
@@ -157,7 +147,7 @@ class _DashboardScreenState extends State<DashboardScreen> { // Buat kelas State
                 ),
                 child: Center(
                   child: Text(
-                    'Area Grafik Ringkasan Bulanan\n(Misalnya, LineChart atau BarChart sederhana)',
+                    'Area Grafik Ringkasan Bulanan\n(Rata-rata Harian: ${oCcy.format(rataRataHarian)})',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey[500]),
                   ),
@@ -173,8 +163,8 @@ class _DashboardScreenState extends State<DashboardScreen> { // Buat kelas State
               ),
               const SizedBox(height: 15),
               ListView.builder(
-                shrinkWrap: true, // Penting agar ListView bisa di dalam SingleChildScrollView
-                physics: const NeverScrollableScrollPhysics(), // Non-scrollable ListView
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: recentTransactions.length,
                 itemBuilder: (context, index) {
                   final transaction = recentTransactions[index];
@@ -212,7 +202,6 @@ class _DashboardScreenState extends State<DashboardScreen> { // Buat kelas State
     );
   }
 
-  // Widget pembantu untuk kartu ringkasan saldo/pengeluaran
   Widget _buildSummaryCard(
     BuildContext context, {
     required NumberFormat oCcy,

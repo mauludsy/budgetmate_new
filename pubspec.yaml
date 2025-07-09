@@ -1,6 +1,6 @@
 name: budget_mate_app
 description: A new Flutter project.
-publish_to: 'none'
+publish_to: 'none' # Remove this line if you want to publish to pub.dev
 
 version: 1.0.0+1
 
@@ -15,6 +15,7 @@ dependencies:
   intl: ^0.20.2
   fl_chart: ^0.68.0
   shared_preferences: ^2.2.0
+  http: ^0.13.6 # ✅ Tambahkan ini untuk request ke backend API
 
   flutter_localizations:
     sdk: flutter

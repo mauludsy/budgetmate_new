@@ -1,50 +1,86 @@
-// lib/screens/auth_screen.dart
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:budget_mate_app/main.dart'; // Import MainScreen dari main.dart
+import 'package:budget_mate_app/services/api_service.dart';
+import 'package:budget_mate_app/screens/main_screen.dart';
 
 class AuthScreen extends StatefulWidget {
-  final VoidCallback? onLoginSuccess; // Ubah menjadi nullable dengan '?'
-
-  const AuthScreen({super.key, this.onLoginSuccess}); // Hapus 'required'
+  const AuthScreen({super.key});
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  final TextEditingController _usernameController = TextEditingController();
+  bool _isLogin = true;
+  bool _isLoading = false;
+
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isLogin = true; // true for login, false for register
+  final TextEditingController _confirmController = TextEditingController();
 
-  Future<void> _authenticate() async {
-    final String username = _usernameController.text;
-    final String password = _passwordController.text;
+  void _toggleForm() {
+    setState(() {
+      _isLogin = !_isLogin;
+    });
+  }
 
-    print('Mencoba login dengan Username: $username, Password: $password'); // Debugging
+  void _showMessage(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
 
-    // Simulasi autentikasi: username 'user', password 'pass'
-    if (username == 'user' && password == 'pass') {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true); // Set status login true
-      print('Login berhasil! isLoggedIn di SharedPreferences: true'); // Debugging
+  Future<void> _submit() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
 
-      // Panggil onLoginSuccess hanya jika tidak null
-      if (widget.onLoginSuccess != null) {
-        widget.onLoginSuccess!(); // Gunakan '!' karena kita sudah cek tidak null
-        print('Callback onLoginSuccess dipanggil.'); // Debugging
+    if (_isLogin) {
+      if (email.isEmpty || password.isEmpty) {
+        _showMessage('Email dan password wajib diisi!');
+        return;
       }
 
-      // Navigasi ke MainScreen dan hapus semua rute sebelumnya
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => MainScreen()), // Hapus 'const' di sini
-        (Route<dynamic> route) => false,
-      );
+      setState(() => _isLoading = true);
+      final success = await ApiService.login(email, password);
+      setState(() => _isLoading = false);
+
+      if (success) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainScreen()));
+      } else {
+        _showMessage('Login gagal! Email atau password salah.');
+      }
     } else {
-      print('Login gagal: Username atau Password salah.'); // Debugging
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Username atau Password salah!')),
-      );
+      final name = _nameController.text.trim();
+      final confirmPassword = _confirmController.text.trim();
+
+      if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+        _showMessage('Semua field wajib diisi!');
+        return;
+      }
+
+      if (!email.contains('@') || !email.contains('.')) {
+        _showMessage('Masukkan email yang valid (cth: user@gmail.com)');
+        return;
+      }
+
+      if (password != confirmPassword) {
+        _showMessage('Password dan konfirmasi tidak sama!');
+        return;
+      }
+
+      setState(() => _isLoading = true);
+      final success = await ApiService.register(name, email, password, confirmPassword);
+      setState(() => _isLoading = false);
+
+      if (success) {
+        _showMessage('Registrasi berhasil. Silakan login.');
+        setState(() {
+          _isLogin = true; // Kembali ke mode login
+          _passwordController.clear();
+          _confirmController.clear();
+        });
+      } else {
+        _showMessage('Registrasi gagal! Email mungkin sudah digunakan.');
+      }
     }
   }
 
@@ -52,52 +88,56 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isLogin ? 'Login' : 'Daftar'),
-        backgroundColor: Colors.green[700],
+        title: Text(_isLogin ? 'Login' : 'Registrasi'),
+        backgroundColor: Colors.green,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Username',
-                border: OutlineInputBorder(),
+            if (!_isLogin)
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Nama Lengkap'),
               ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: 'Email (cth: user@gmail.com)'),
+              keyboardType: TextInputType.emailAddress,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             TextField(
               controller: _passwordController,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Password'),
             ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _authenticate,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                backgroundColor: Colors.green[600],
-                foregroundColor: Colors.white,
+            if (!_isLogin)
+              const SizedBox(height: 10),
+            if (!_isLogin)
+              TextField(
+                controller: _confirmController,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: 'Konfirmasi Password'),
               ),
-              child: Text(_isLogin ? 'Login' : 'Daftar'),
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+                    onPressed: _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green.shade700,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    ),
+                    child: Text(_isLogin ? 'Login' : 'Daftar'),
+                  ),
             TextButton(
-              onPressed: () {
-                setState(() {
-                  _isLogin = !_isLogin;
-                  // Kosongkan field saat beralih mode
-                  _usernameController.clear();
-                  _passwordController.clear();
-                });
-              },
-              child: Text(_isLogin ? 'Belum punya akun? Daftar' : 'Sudah punya akun? Login'),
-            ),
+              onPressed: _toggleForm,
+              child: Text(_isLogin
+                  ? 'Belum punya akun? Daftar di sini'
+                  : 'Sudah punya akun? Login di sini'),
+            )
           ],
         ),
       ),
