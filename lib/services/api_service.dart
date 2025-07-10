@@ -3,9 +3,15 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
+  // static const baseUrl = 'http://192.168.0.127:8000';
+  // static const baseUrl = 'http://192.168.18.139:8000';
   static const baseUrl = 'http://192.168.100.28:8000';
 
-  // LOGIN pakai email
+  
+
+
+
+  // LOGIN
   static Future<bool> login(String email, String password) async {
     try {
       final response = await http.post(
@@ -34,32 +40,28 @@ class ApiService {
     }
   }
 
-  // REGISTER pakai email
-  // REGISTER pakai email
-static Future<bool> register(
-    String name, String email, String password, String confirmPassword) async {
-  try {
-    final response = await http.post(
-      Uri.parse('$baseUrl/api/register'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'name': name,
-        'email': email,
-        'password': password,
-        'password_confirmation': confirmPassword,
-      }),
-    );
+  // REGISTER
+  static Future<bool> register(String name, String email, String password,
+      String confirmPassword) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'name': name,
+          'email': email,
+          'password': password,
+          'password_confirmation': confirmPassword,
+        }),
+      );
 
-    print('📥 Register Response: ${response.statusCode} → ${response.body}');
-
-    // Jangan langsung simpan token. Biarkan user login manual setelah registrasi.
-    return response.statusCode == 201 || response.statusCode == 200;
-  } catch (e) {
-    print("❌ Register error: $e");
-    return false;
+      print('📥 Register Response: ${response.statusCode} → ${response.body}');
+      return response.statusCode == 201 || response.statusCode == 200;
+    } catch (e) {
+      print("❌ Register error: $e");
+      return false;
+    }
   }
-}
-
 
   // GET PROFILE
   static Future<Map<String, dynamic>?> getProfile() async {
@@ -77,7 +79,8 @@ static Future<bool> register(
         },
       );
 
-      print('👤 Get Profile Response: ${response.statusCode} → ${response.body}');
+      print(
+          '👤 Get Profile Response: ${response.statusCode} → ${response.body}');
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -134,14 +137,23 @@ static Future<bool> register(
       return false;
     }
 
+    // 🔁 Mapping "Pemasukan"/"Pengeluaran" ke "income"/"expense"
+    final Map<String, String> typeMapping = {
+      'Pengeluaran': 'expense',
+      'Pemasukan': 'income',
+      'expense': 'expense',
+      'income': 'income',
+    };
+    final String finalType = typeMapping[type] ?? 'expense';
+
     final Map<String, dynamic> requestBody = {
       'amount': amount,
       'category': category,
-      'type': type,
+      'type': finalType, // ✅ Dipastikan valid untuk backend
       'date': date,
     };
 
-    print('📤 Kirim Transaksi → $requestBody');
+    print('📤 Kirim Transaksi: $requestBody');
 
     try {
       final response = await http.post(
@@ -159,6 +171,41 @@ static Future<bool> register(
     } catch (e) {
       print("❌ Error kirim transaksi: $e");
       return false;
+    }
+  }
+
+  // GET ALL TRANSACTIONS
+  static Future<List<dynamic>> getTransactions() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      print("⚠️ Token tidak ditemukan saat getTransactions");
+      throw Exception("Token tidak ditemukan");
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/transactions'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
+
+      print(
+          '📥 Get Transactions Response: ${response.statusCode} → ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return responseData['data']; // Laravel API biasanya pakai key "data"
+      } else {
+        throw Exception('Gagal mengambil data transaksi');
+      }
+    } catch (e) {
+      print("❌ Get transactions error: $e");
+      rethrow;
     }
   }
 }

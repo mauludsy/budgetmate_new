@@ -44,7 +44,12 @@ class _AuthScreenState extends State<AuthScreen> {
       setState(() => _isLoading = false);
 
       if (success) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainScreen()));
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true); // ✅ simpan status login
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainScreen()),
+        );
       } else {
         _showMessage('Login gagal! Email atau password salah.');
       }
@@ -62,6 +67,11 @@ class _AuthScreenState extends State<AuthScreen> {
         return;
       }
 
+      if (password.length < 6) {
+        _showMessage('Password minimal 6 karakter!');
+        return;
+      }
+
       if (password != confirmPassword) {
         _showMessage('Password dan konfirmasi tidak sama!');
         return;
@@ -74,7 +84,7 @@ class _AuthScreenState extends State<AuthScreen> {
       if (success) {
         _showMessage('Registrasi berhasil. Silakan login.');
         setState(() {
-          _isLogin = true; // Kembali ke mode login
+          _isLogin = true;
           _passwordController.clear();
           _confirmController.clear();
         });
@@ -112,8 +122,7 @@ class _AuthScreenState extends State<AuthScreen> {
               obscureText: true,
               decoration: const InputDecoration(labelText: 'Password'),
             ),
-            if (!_isLogin)
-              const SizedBox(height: 10),
+            if (!_isLogin) const SizedBox(height: 10),
             if (!_isLogin)
               TextField(
                 controller: _confirmController,

@@ -1,261 +1,77 @@
-// lib/screens/dashboard_screen.dart
 import 'package:flutter/material.dart';
+import 'package:budget_mate_app/screens/graph_screen.dart';
+import 'package:budget_mate_app/services/api_service.dart';
 import 'package:intl/intl.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  DashboardScreenState createState() => DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
-  static const Color _customAppGreenColor = Color(0xFFC4E860);
-
-  late DateTime _selectedMonth;
+class DashboardScreenState extends State<DashboardScreen> {
+  double totalPengeluaran = 0;
+  double totalPemasukan = 0;
 
   @override
   void initState() {
     super.initState();
-    _selectedMonth = DateTime.now(); // Inisialisasi dengan bulan/tahun saat ini
+    fetchDashboardData();
   }
 
-  // Fungsi untuk berpindah bulan
-  void _changeMonth(int monthsToAdd) {
-    setState(() {
-      _selectedMonth = DateTime(
-        _selectedMonth.year,
-        _selectedMonth.month + monthsToAdd,
-        _selectedMonth.day,
-      );
-    });
+  Future<void> fetchDashboardData() async {
+    try {
+      final transactions = await ApiService.getTransactions();
+      double pengeluaran = 0;
+      double pemasukan = 0;
+
+      for (var tx in transactions) {
+        final amount = double.tryParse(tx['amount'].toString()) ?? 0;
+        if (tx['type'] == 'expense') {
+          pengeluaran += amount;
+        } else if (tx['type'] == 'income') {
+          pemasukan += amount;
+        }
+      }
+
+      setState(() {
+        totalPengeluaran = pengeluaran;
+        totalPemasukan = pemasukan;
+      });
+    } catch (e) {
+      print('❌ Error fetching dashboard summary: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Contoh data dummy
-    final double totalPengeluaranBulanIni = 2271000.0;
-    final double rataRataHarian = 84111.0;
-    final double pengeluaranHariIni = 150000.0; // Dummy data
-    final double saldoSaatIni = 5500000.0; // Dummy data
-
-    // Format bulan (disingkat) dan tahun (angka biasa)
-    // Contoh: "Jul 2025" atau "Jun 2024"
-    final String displayMonthYear = DateFormat('MMM yyyy', 'id').format(_selectedMonth); // <<< PERBAIKAN DI SINI
-
-    final oCcy = NumberFormat.currency(locale: 'id', symbol: 'Rp', decimalDigits: 0);
-
-    // Data dummy untuk transaksi terbaru
-    final List<Map<String, dynamic>> recentTransactions = [
-      {'category': 'Makan Siang', 'amount': 35000.0, 'isExpense': true, 'icon': Icons.fastfood},
-      {'category': 'Gaji Bulanan', 'amount': 7000000.0, 'isExpense': false, 'icon': Icons.payments},
-      {'category': 'Belanja Bulanan', 'amount': 500000.0, 'isExpense': true, 'icon': Icons.shopping_bag},
-      {'category': 'Pulsa Telepon', 'amount': 50000.0, 'isExpense': true, 'icon': Icons.phone},
-      {'category': 'Bonus Proyek', 'amount': 1000000.0, 'isExpense': false, 'icon': Icons.card_giftcard},
-      {'category': 'Nonton Bioskop', 'amount': 75000.0, 'isExpense': true, 'icon': Icons.movie},
-    ];
-
-    return Container(
-      color: Colors.white,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Bulan dan Tahun
-              Container(
-                color: _customAppGreenColor,
-                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.chevron_left, color: Colors.white),
-                          onPressed: () => _changeMonth(-1),
-                        ),
-                        Text(
-                          displayMonthYear, // MENGGUNAKAN FORMAT BULAN DAN TAHUN STANDAR
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.chevron_right, color: Colors.white),
-                          onPressed: () => _changeMonth(1),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 48),
-                  ],
-                ),
-              ),
-
-              // Tab Pengeluaran / Pemasukan
-              Container(
-                color: _customAppGreenColor,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: const BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(color: Colors.white, width: 2),
-                          ),
-                        ),
-                        child: const Text(
-                          'Pengeluaran',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: const Text(
-                          'Pemasukan',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Area Saldo, Pengeluaran Hari Ini, Bulan Ini
-              _buildSummaryCard(
-                context,
-                oCcy: oCcy,
-                saldo: saldoSaatIni,
-                pengeluaranHariIni: pengeluaranHariIni,
-                pengeluaranBulanIni: totalPengeluaranBulanIni,
-              ),
-
-              const SizedBox(height: 20),
-
-              // Area Grafik Utama (placeholder)
-              Container(
-                height: 200,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Text(
-                    'Area Grafik Ringkasan Bulanan\n(Rata-rata Harian: ${oCcy.format(rataRataHarian)})',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey[500]),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // Daftar Transaksi Terbaru
-              const Text(
-                'Transaksi Terbaru',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 15),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: recentTransactions.length,
-                itemBuilder: (context, index) {
-                  final transaction = recentTransactions[index];
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 6.0),
-                    elevation: 1,
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: transaction['isExpense'] ? Colors.red[100] : Colors.green[100],
-                        child: Icon(
-                          transaction['icon'] as IconData,
-                          color: transaction['isExpense'] ? Colors.red : Colors.green,
-                        ),
-                      ),
-                      title: Text(
-                        transaction['category'] as String,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      trailing: Text(
-                        '${transaction['isExpense'] ? '-' : '+'}${oCcy.format(transaction['amount'])}',
-                        style: TextStyle(
-                          color: transaction['isExpense'] ? Colors.red : Colors.green,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 30),
-            ],
+    final formatter = NumberFormat.currency(locale: 'id', symbol: 'Rp', decimalDigits: 0);
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Card(
+            elevation: 3,
+            child: ListTile(
+              title: const Text("Total Pemasukan", style: TextStyle(fontWeight: FontWeight.bold)),
+              trailing: Text(formatter.format(totalPemasukan)),
+            ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSummaryCard(
-    BuildContext context, {
-    required NumberFormat oCcy,
-    required double saldo,
-    required double pengeluaranHariIni,
-    required double pengeluaranBulanIni,
-  }) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Saldo Saat Ini',
-              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+          const SizedBox(height: 10),
+          Card(
+            elevation: 3,
+            child: ListTile(
+              title: const Text("Total Pengeluaran", style: TextStyle(fontWeight: FontWeight.bold)),
+              trailing: Text(formatter.format(totalPengeluaran)),
             ),
-            const SizedBox(height: 4),
-            Text(
-              oCcy.format(saldo),
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.green),
-            ),
-            const Divider(height: 20, thickness: 1),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Pengeluaran Hari Ini', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-                    const SizedBox(height: 4),
-                    Text(
-                      oCcy.format(pengeluaranHariIni),
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text('Pengeluaran Bulan Ini', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-                    const SizedBox(height: 4),
-                    Text(
-                      oCcy.format(pengeluaranBulanIni),
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 20),
+          const Text("Grafik Pengeluaran", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          const GraphScreen(), // grafik pie ditampilkan di dashboard
+        ],
       ),
     );
   }
