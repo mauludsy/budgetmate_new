@@ -1,112 +1,71 @@
 // lib/screens/split_bill_screen.dart
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:provider/provider.dart'; // Pastikan package provider sudah ada di pubspec.yaml
+import '../models/split_bill_models.dart';
+import '../widgets/split_bill/bill_input_section.dart';
+import '../widgets/split_bill/item_list_section.dart';
+import '../widgets/split_bill/participant_list_section.dart';
+import '../widgets/split_bill/summary_result_section.dart';
 
-class SplitBillScreen extends StatefulWidget {
-  const SplitBillScreen({super.key});
-
-  @override
-  State<SplitBillScreen> createState() => _SplitBillScreenState();
-}
-
-class _SplitBillScreenState extends State<SplitBillScreen> {
-  final _totalBillController = TextEditingController();
-  final _numPeopleController = TextEditingController();
-  double _billPerPerson = 0.0;
-  final oCcy = NumberFormat.currency(locale: 'id', symbol: 'Rp', decimalDigits: 0);
-
-  void _calculateSplit() {
-    double totalBill = double.tryParse(_totalBillController.text) ?? 0.0;
-    int numPeople = int.tryParse(_numPeopleController.text) ?? 1;
-
-    if (numPeople > 0) {
-      setState(() {
-        _billPerPerson = totalBill / numPeople;
-      });
-    } else {
-      setState(() {
-        _billPerPerson = 0.0;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Jumlah orang harus lebih dari 0')),
-      );
-    }
-  }
+class SplitBillScreen extends StatelessWidget {
+  const SplitBillScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Hitung Bagi Tagihan',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 30),
-            TextField(
-              controller: _totalBillController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Total Tagihan (Rp)',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.attach_money),
-              ),
-              onChanged: (value) => _calculateSplit(),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _numPeopleController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Jumlah Orang',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.people),
-              ),
-              onChanged: (value) => _calculateSplit(),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _calculateSplit,
-              icon: const Icon(Icons.calculate),
-              label: const Text(
-                'Hitung',
-                style: TextStyle(fontSize: 18),
-              ),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                backgroundColor: Colors.blue[600],
-                foregroundColor: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 30),
-            Card(
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  children: [
-                    const Text(
-                      'Tagihan per Orang:',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return ChangeNotifierProvider(
+      create: (context) => SplitBillData(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Split Bill Canggih'),
+          backgroundColor: const Color(0xFF67B00C),
+        ),
+        body: Consumer<SplitBillData>(
+          builder: (context, splitBillData, child) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Section 1: Input Detail Bill (Total, Tax, Service Charge, Additional)
+                  BillInputSection(),
+                  const SizedBox(height: 20),
+
+                  // Section 2: Input & List Items
+                  ItemListSection(),
+                  const SizedBox(height: 20),
+
+                  // Section 3: Input & List Participants
+                  ParticipantListSection(),
+                  const SizedBox(height: 20),
+
+                  // Section 4: Tombol Hitung dan Hasil
+                  ElevatedButton(
+                    onPressed: () {
+                      splitBillData.calculateSplit();
+                      // Tampilkan snackbar atau navigasi ke halaman hasil
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Pembagian dihitung!')),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFFD767),
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      oCcy.format(_billPerPerson),
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green[700],
-                      ),
+                    child: const Text(
+                      'Hitung Pembagian',
+                      style: TextStyle(fontSize: 18, color: Colors.black87),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Section 5: Hasil Pembagian
+                  SummaryResultSection(),
+                  const SizedBox(height: 50), // Ruang untuk FAB di masa depan
+                ],
               ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
