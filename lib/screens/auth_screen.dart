@@ -136,7 +136,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     onPressed: _submit,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green.shade700,
-                      foregroundColor: Colors.white,
+                      foregroundColor: const Color.fromARGB(255, 228, 225, 225),
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                     ),
                     child: Text(_isLogin ? 'Login' : 'Daftar'),
