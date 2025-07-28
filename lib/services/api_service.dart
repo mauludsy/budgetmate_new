@@ -3,9 +3,11 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  // static const baseUrl = 'http://192.168.0.127:8000';
-  // static const baseUrl = 'http://192.168.18.139:8000';
-  static const baseUrl = 'http://192.168.100.28:8000';
+  
+  // static const baseUrl = 'http://192.168.112.67:8000';
+  static const baseUrl = 'http://192.168.100.240:8000';
+  
+
 
   
 
